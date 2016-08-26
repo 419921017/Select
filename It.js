@@ -246,10 +246,236 @@
             [].push.apply( newObj, arr );
             newObj.prev = this;
             return newObj;
-        }
-
+        },
+        //css : function( name, value ){
+        //    if( typeof name === 'string' && value === undefined ){
+        //        this.each(function( i, v ){
+        //            this.style[ name ] = value;
+        //        });
+        //    }else{
+        //        if( typeof name === 'string' && typeof value === 'string'){
+        //            return this.get( 0).style[ name ] ||
+        //                window.getComputedStyle( this.get( 0 ), name ) ||
+        //                this.get( 0 ).currentStyle( name );
+        //        }else if( typeof name == 'object' && value === undefined){
+        //            for (var key in name) {
+        //                this.each(function( i, v ){
+        //                    this.style[ key ] = name[key];
+        //                });
+        //            }
+        //        }
+        //    }
+        //},
+        //attr : function( name, value ){
+        //    if( typeof name === 'string' && typeof value === 'string' ){
+        //        this.each(function(){
+        //            this.setAttribute( name, value );
+        //        });
+        //    }else if( typeof name === 'object' && value === undefined){
+        //        this.each(function(){
+        //            for( var key in name ){
+        //                this.setAttribute( key, name[key] );
+        //            }
+        //        })
+        //    }else if( typeof name === 'string' && value === undefined ){
+        //        return this.get(0).getAttribute( name );
+        //    }
+        //    return this;
+        //},
+        //removeAttr : function( name ){
+        //    if( typeof name === 'string' ){
+        //        this.each(function () {
+        //            this.removeAttribute( name );
+        //        })
+        //    }
+        //    return this;
+        //},
+        //prop : function( name, bool ){
+        //    if( typeof name === 'string' && typeof bool === 'boolean'){
+        //        this.each(function(){
+        //            this[name] = bool ;
+        //        })
+        //    }else if ( typeof name === 'string' && bool === undefined){
+        //        return this.get[0][name];
+        //    }else if ( typeof name === 'string' && typeof bool === 'function'){
+        //        this.each(function(){
+        //            this[name] = bool.call( this, this, i )
+        //        })
+        //    }
+        //    return this;
+        //}
+        //
 
     });
+
+
+    // 样式操作
+    It.extend({
+        getStyle : function( dom, name ){
+            if( dom.currentStyle ){
+                return dom.currentStyle[ name ];
+            } else if( window.getComputedStyle ) {
+                // 返回的是一个对象
+                return window.getComputedStyle( dom )[ name ];
+            }
+
+        }
+    });
+
+    It.fn.extend({
+        css : function( name ,value ){
+            if( typeof name === 'string' && typeof value === 'string'){
+                this.each(function () {
+                    this.style[name] = value;
+                });
+            }else if( typeof name === 'string' && value === undefined){
+                return this.constructor.getStyle( this[0], name )  ;
+            }else if( typeof name === 'object' && value === undefined){
+                for (var key in name) {
+                    this.each(function () {
+                        this.style[key] = name[key];
+                    })
+                }
+            }
+            return this;
+        },
+
+    });
+
+
+
+    // 类名操作
+    It.fn.extend({
+        addClass : function( name ){
+            this.each(function(){
+                var value = this.className;
+                var arr = value.replace( /\s+/g , ' ').split( ' ' );
+                if( !value ){
+                    this.className = name;
+                }else if( arr.indexOf( name ) == -1 ){
+                    this.className += ' ' + name;
+                }
+                return this;
+            })
+        },
+        removeClass : function( name ){
+            this.each(function () {
+                var value = this.className;
+                var arr = value.replace( /\s+/g , ' ').split(' ');
+                var temp;
+                while( (temp = arr.indexOf( name )) != -1 ){
+                    arr.splice( temp , 1 );
+                }
+                this.className = arr.join(' ');
+            })
+        },
+        hasClass : function( name ){
+            var res = this.map(function ( v ,i ) {
+                var val = v.replace( /\s+/g , ' ').split(' ');
+                if( val.indexOf( name ) != -1 ){
+                    return true;
+                }
+            });
+            return res.length > 0;
+        },
+        toggleClass : function( name ){
+            var that = this;
+            this.each(function () {
+                if( that.constructor(this).hasClass( name ) ){
+                    that.constructor(this).removeClass( name );
+                }else{
+                    that.constructor(this).addClass( name );
+                }
+            });
+        }
+    });
+
+
+
+
+
+    // 属性操作
+    It.fn.extend({
+
+        attr : function( name , value ){
+            if( typeof name === 'string' && value === undefined){
+                return this.get(0).getAttribute( name );
+            }else if( typeof name === 'string' && value === 'string'){
+                this.each(function () {
+                    this.setAttribute( name, value );
+                });
+            }else if( typeof name === 'object' && value === undefined){
+                for (var key in name) {
+                    this.each(function () {
+                        this.setAttribute( key , name[key]);
+                    });
+                }
+            }
+            return this;
+        },
+        removeAttr : function( name ){
+            if( typeof name === 'string'){
+                this.each(function () {
+                    this.removeAttribute( name );
+                });
+            }
+            return this;
+        },
+        val : function( name ){
+            if( typeof name === 'string'){
+                this.each(function () {
+                    this[value] = name;
+                });
+            }else if( name === undefined ){
+                return this.get(0)[value];
+            }
+            return this;
+        },
+        html : function( html ){
+            if( typeof html === 'string' ){
+                this.each(function () {
+                    this.innerHTML = html;
+                });
+            }else if( typeof html === undefined){
+                return this.get(0).innerHTML;
+            }
+            return this;
+        },
+        text : function( text ){
+            if( typeof text === 'string'){
+                this.each(function () {
+                    this[innerText] = text;
+                });
+            }else if( text === undefined ){
+                return this[0].innerText;
+            }
+            return this;
+        },
+        prop : function( name , value ){
+            if( typeof name === 'string' && value === undefined){
+                return this.get(0)[name];
+            }else if( typeof name === 'string' && typeof value === 'boolean'){
+                this.each(function () {
+                    this[name] = value;
+                });
+            }else if( typeof name === 'object' && value === undefined ){
+                for (var key in name) {
+                    this.each(function () {
+                        this[ key ] = name[key];
+
+                    });
+                }
+            }else if( typeof name === 'string' && typeof value === 'function'){
+                this.each(function( i, v ){
+                    this[ name ] = value.call( this, this, i );
+                });
+            }
+            return this;
+        }
+
+    });
+
+
 
 
     // 选择器模块
@@ -492,84 +718,3 @@
     window.It = window.I = It;
 
 })(window);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
