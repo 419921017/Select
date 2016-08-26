@@ -1,317 +1,395 @@
-// 在框架中只有 Itcast 与 I 暴露在外面, 其余的所有内容应该在闭包中
-(function ( window, undefined ) {
+/**
+ * Created by Liu on 2016/8/19.
+ */
 
+(function (window, undefined) {
 
-// 定义Itcast构造函数
-    function Itcast ( selector ) {
-        return new Itcast.fn.init( selector );
+    function It(selector){
+        return new It.fn.init(selector);
     }
-    Itcast.fn = Itcast.prototype = {
-        constructor: Itcast,
-
-        type: 'Itcast',
-
-        length: 0,
-
-        // 核心模块内容
-        init: function ( selector ) {
-            // 假设 这里 的 init 就是 jq 的init, 因此可以考虑各种参数
-
-            // '', null, undefined
-            if ( !selector ) {
+    It.fn = It.prototype = {
+        constructor : It,
+        length : 0,
+        type : 'It',
+        init : function(selector){
+            if( !selector ){
                 return this;
             }
-
-
-            // str
-            if ( typeof selector == 'string' ) {
-                // 这里可能是 html 的字符串, 也可能是 选择器
-                if ( selector.charAt( 0 ) === '<' ) {
-                    // 是 html 字符串
-                    // 将字符串转换成 DOM 对象, 并加到 this 中
-                    [].push.apply( this, Itcast.parseHTML( selector ) );
-                } else {
-                    // 是选择器
-                    // 获取元素, 并加到 this 中
-                    // 使用 Itcast.Select
-                    [].push.apply( this, Itcast.Select( selector ));
+            if( typeof selector == 'string' ){
+                if( selector.charAt(0) == '<' && selector.charAt(selector.length - 1) && selector.length >= 3 ){
+                    [].push.apply( this, It.parseHtml( selector ) );
+                    return this;
+                }else{
+                    [].push.apply( this, It.Select( selector ) );
+                    return this;
                 }
+            }
+            if( typeof selector == 'function' ){
+
+            }
+            if( selector.nodeType ){
+                this[0] = selector;
+                this.length = 1;
                 return this;
             }
-
-
-            // fn
-            if ( typeof selector == 'function' ) {
-
+            if( selector.type == 'It' ){
+                [].push.apply( this, selector );
+                return this;
             }
-
-            // dom
-            if ( selector.nodeType ) {
-
+            // 如果上述条件都不是 那么默认认为他是数组
+            if( selector >= 0 ){
+                [].push.apply( this, selector );
+            }else{
+                this[0] = selector;
+                this.length = 1;
             }
-
-            // itcast
-            if ( selector.type == 'Itcast' ) {
-
+            return this;
+        },
+        toArray : function () {
+            return [].slice.apply( this,0 );
+        },
+        get : function(index){
+            if( index === undefined ){
+                return this.toArray();
+            }else{
+                if(index >= 0){
+                    return this[index];
+                }else{
+                    return this[this.length + index];
+                }
             }
+        },
+        eq : function ( index ) {
+            return It( this.get( index ) );
+        },
+        first : function(){
+            return this.eq( 1 );
+        },
+        last : function(){
+            return this.eq( -1 );
+        },
+        each : function( callback ){
+            It.each( this, callback );
+            return this;
+        },
+        map : function( callback ){
+            It.map( this, callback );
+            return this;
+        },
+        appendTo : function( selector ){
+            var iObj = this.constructor( selector );
+            var newObj = this.constructor();
+            var arr = [],
+                temp;
+            for(var i =0;i< iObj.length;i++){
+                for(var j =0;j<this.length;j++){
+                    temp = i === iObj.length -1 ? this[j] : this[j].cloneNode(true);
+                    arr.push( temp );
+                    iObj[i].appendChild( temp );
+                }
+            }
+            [].push.apply( newObj , arr );
 
-            // 不知道的 return this
+            newObj.prev = this;
+
+            return newObj;
+
+        },
+        append : function (selector) {
+            this.constructor( selector ).appendTo( this );
+            return this;
+        },
+        prependTo : function( selector ){
+
+        },
+        prepend : function( selector ){
+
+        },
+        end : function(){
+            return this.prev || prev;
         }
-    };
-    Itcast.fn.init.prototype = Itcast.fn;
 
-// 添加 extend 方法
-    Itcast.extend = Itcast.fn.extend = function ( obj ) {
-        for ( var k in obj ) {
-            this[ k ] = obj[ k ];
+
+
+    }
+
+    It.fn.init.prototype = It.fn;
+
+    // 混入方法
+    It.extend = It.fn.extend = function(obj){
+        for (var key in obj) {
+            this[key] = obj[key];
         }
-    };
+        return this;
+    }
 
 
-// 选择器模块放到这里
+    // 静态方法
+    It.extend({
+        each : function( array, callback ){
+            var res;
+            if( array.length >= 0 ){
+                for(var i = 0;i<array.length;i++){
+                    res = callback.apply( array[i], [i , array[i]] );
+                    if(res === false){
+                        break;
+                    }
+                }
+            }else{
+                for (var key in array) {
+                    res = callback.apply( array[key], [key, array[key]] );
+                    if( res === false ){
+                        break
+                    }
+                }
+            }
+            return array;
+        },
+        map : function( array, callback ){
+            var arr = [],
+                res;
+            if( array.length >= 0 ){
+                for(var i = 0;i<array.length;i++){
+                    res = callback( array[i], i );
+                    if(res != undefined){
+                        arr.push( res )
+                    }
+                }
+            }else{
+                for (var key in array) {
+                    res = callback( array(key) , key );
+                    if(res != undefined){
+                        arr.push(res);
+                    }
+                }
+            }
+            return arr;
+        }
+    });
+
+
+
+
+
+
+    // 实例成员
+    It.fn.extend({
+
+    });
+
+
+
+    // 选择器模块
     var Select =
-
-        (function () {
-
-//1> 定义一个 support 对象. 将需要使用的方法进行处理, 得到方法的能力
-//2> 需要使用的可能有兼容性的方法, 定义一个可以完成该方法的函数来替代. 在函数内部进行兼容处理
-//3> 定义 select 函数. 首先看是否支持 qsa, 如果支持直接使用. 如果不支持自己再来实现
+        (function(){
 
             var support = {},
+                push = [].push,
+                rnative = /\[native code\]/;
 
-                rnative = /\[native code\]/,
+            support.qsa = rnative.test( document.querySelectorAll );
 
-                push = [].push;	// 一开始就存储方法, 后面再是用的时候就不用每次都创建数组了. 也避免了原型的搜索
+            // 继承的是 docuement 上面的 class 方法
+            support.getClassName1 = rnative.test( document.getElementsByClassName );
 
-
-// 处理 push 的兼容性问题
-            try {
-
-                push.apply([], document.getElementsByTagName( '*' ));
-
-            } catch( e ) {
-                // 自定义
-                push = {
-                    apply: function ( a, b ) {
-                        // 将 b 中的每一个元素加到 a 中
-                        for ( var i = 0; i < b.length; i++ ) {
-                            a[ a.length++ ] = b[ i ];
-                        }
-                        return a.length;
-                    }
-                };
-            }
-
-            support.qsa = rnative.test( document.querySelectorAll + '' );
-            support.getElementsByClassName = rnative.test( document.getElementsByClassName );
-            support.trim = rnative.test( String.prototype.trim + '' );
-
-
-
+            // 继承的是 node 上面的 class 方法
             var div = document.createElement( 'div' );
-            support.getElementsByClassName2 = rnative.test( div.getElementsByClassName );
+            support.getClassName2 = rnative.test( div.getElementsByTagName );
 
+            support.indexOf = rnative.test( Array.prototype.indexOf );
 
+            support.trim = rnative.test( String.prototype.trim );
 
-
-
-// 判断数组的方法
-            support.indexOf = rnative.test( Array.prototype.indexOf + '' );
-
-
-// 判断数组 array 中是否含有 search 元素
-// 如果数组支持 indexOf 就应该使用数组提供的方法, 不支持才自定义实现
-// indexOf 还需要一个参数, 就是 查找的开始位置
-            function indexOf( array, search, startIndex ) {
-                startIndex = startIndex || 0;
-
-                if ( support.indexOf ) {
-                    return array.indexOf( search, startIndex );
-                }
-
-                for ( var i = startIndex; i < array.length; i++ ) {
-                    if ( array[ i ] === search ) {
-                        return i;
+            // apply 兼容性处理
+            try{
+                push.apply( [], document.getElementsByTagName( '*' ) );
+            } catch(e) {
+                push = {
+                    apply : function (a, b) {
+                        for(var i = 0;i<b.length;i++){
+                            a[a.length++] = b[i];
+                        }
+                    },
+                    call : function (a) {
+                        var args = [];
+                        for(var i =1;i<arguments.length;i++){
+                            args.push( arguments[i] );
+                        }
+                        this.apply( a, args );
                     }
                 }
-                return -1;
             }
 
+            function indexOf( array, search, startIndex ){
+                startIndex = startIndex || 0;
+                if( support.indexOf ){
+                    return array.indexOf( search, startIndex );
+                }else{
+                    for(var i = startIndex;i < array.length;i++){
+                        if( search == array[i] ){
+                            return i;
+                        }
+                    }
+                    return -1;
+                }
+            }
 
-// 提供进行筛选重复的方法
-            function unique( arr ) {
+            function trim( string ){
+                if( support.trim ){
+                    return string.trim();
+                }else{
+                    return string.replace( /^\s+|\s+$/ , '' );
+                }
+            }
+
+            function unique(array){
                 var newArr = [];
-                for ( var i = 0; i < arr.length; i++ ) {
-                    // if ( newArr.indexOf( arr[ i ] ) == -1 ) {
-                    if ( indexOf( newArr, arr[ i ] ) == -1 ) {
-                        newArr.push( arr[ i ] );
+                for(var i = 0;i<array.length;i++){
+                    if( indexOf( newArr, array[i] ) == -1){
+                        newArr.push( array[i] );
                     }
                 }
                 return newArr;
             }
 
+            // 基本选择器
+            function basicSelector( selector, node, results){
+                node = node || document;
+                results = results || [];
+                var first = selector.charAt(0);
+                // 选择器没有空格, 就是基本选择器
+                if( !(/\s+/g).test( selector ) ){
+                    if( selector == '*' ){
+                        return getTag( selector, node, results );
+                    }else if( first == '#'){
+                        return getId( selector.slice(1), node, results );
+                    }else if( first == '.' ){
+                        return getClass( selector.slice(1), node, results );
+                    }else{
+                        return getTag( selector, node, results );
+                    }
+                }else{
+                    // 后代选择器
+                    if( /^[\w\d\.\-_#]+(\s+[\w\d\.\-_#]+)+$/.test(selector)){
+                        push.apply( results, getChildren( selector, node ) );
+                        return results;
+                    }else{
+                        throw new Error( '无法实现该功能' );
+                    }
+                    // 更多功能...
+                }
+            }
 
+            // 四个基本选择器
+            function getTag( tagName, node, results ){
+                node = node || document;
+                result = results || [];
+                push.apply( results, node.getElementsByTagName( tagName ) );
+                return results;
+            }
+            function getClass( className, node, results ){
+                node = node || document;
+                results = results || [];
+                push.apply( results, getByClass( className, node, results ) );
+                return results;
+            }
+            function getId( IdName, node, results ){
+                node = node || document;
+                results = results || [];
+                var dom = node.getElementById( IdName );
+                if( dom ){
+                    push.apply( results, [dom] );
+                    return results;
+                }
 
+            }
 
-            function getByClass( className, node ) {
-                if ( node == document && support.getElementsByClassName ||
-                    node.nodeType == 1 && support.getElementsByClassName2 ) {
-
+            // getClassName 的兼容性处理
+            function getByClass( className, node ){
+                node = node || document;
+                if( node == document && support.getClassName1 || node.nodeType == 1 && support.getClassName2 ){
                     return node.getElementsByClassName( className );
-                } else {
-                    // 用自己的算法实现
-                    var arr = [],
-                        list = node.getElementsByTagName( '*' ),
-                        tempClassName;
-                    for ( var i = 0; i < list.length; i++ ) {
-                        // if ( list[ i ].getAttribute( 'class' ).split( ' ' ).indexOf( className ) != -1  ) {
-                        tempClassName = list[ i ].getAttribute( 'class' );
-
-                        if ( !tempClassName ) continue;
-                        // 避免过多的花括号与缩进
-
-                        if ( indexOf( tempClassName.split( ' ' ),
-                                className ) != -1 ) {
-
-                            arr.push( list[ i ] );
+                }else{
+                    var lists = node.getElementsByTagName( '*' );
+                    var arr = [];
+                    var temp;
+                    for(var i =0;i < lists.length;i++){
+                        temp = lists[i].getAttribute( 'class' );
+                        if( indexOf( temp, className ) != -1){
+                            arr.push( lists[i] );
                         }
                     }
                     return arr;
                 }
             }
 
-            function trim( str ) {
-                // 将 str 两边的空格去掉
-                if ( support.trim ) {
-                    return str.trim();
+            // 后代选择器
+            function getChildren(selector, node){
+                node = node || document;
+                var lists = selector.replace( /\s+/g, ' ' ).split( ' ' );
+                var res1;
+                var res2 = [ node ];
+                for(var i = 0; i< lists.length;i++){
+                    res1 = res2;
+                    res2 = [];
+                    for(var j = 0;j<res1.length;j++){
+                        basicSelector( lists[i], res1[j] , res2 );
+                    }
                 }
-                return str.replace( /^\s+|\s+$/g, '' );
+                return res2;
+
             }
 
-
-
-
-            var Select = function ( selector, results ) {
-
+            // 并集选择器
+            function getBoth( selector, node, results ){
+                node = node || document;
                 results = results || [];
-
-                if ( support.qsa ) {
-
-                    push.apply( results, document.querySelectorAll( selector ) );
-
-                    return unique(results);
-                }
-
-
-                return select2( selector, results );
-            }
-
-
-
-// 获取元素的基本方法
-            function t ( tagName, results ) {
-                results = results || [];
-                push.apply( results, document.getElementsByTagName( tagName ) );
-                return results;
-            }
-            function c ( className, results ) {
-                results = results || [];
-                push.apply( results, getByClass( className, document ) );
-                return results;
-            }
-            function id ( idName, results ) {
-                results = results || [];
-                var dom = document.getElementById( idName );
-                if ( dom ) {
-                    push.apply( results, [ dom ] );
-                    // results[ results.length++ ] = dom;
-                }
-                return results;
-            }
-
-
-            function select2( selector, results ) {
-                // 将字符串 selector split 成一个数组, 然后去除两端的空格, 遍历, 遍历的时候使用 select3
-                results = results || [];
-                var list = selector.split( ',' );
-                for ( var i = 0; i < list.length; i++ ) {
-
-                    select3( trim( list[ i ] ), results );
-
+                var lists = selector.split( ',' );
+                for(var i=0,len=lists.length; i<len; i++){
+                    basicSelector( trim( lists[i] ), node, results );
                 }
                 return unique(results);
             }
 
 
-            function select3( selector, results ) {
-                // 只考虑 4 个基本选择器: #id, .className, tag, *
-                // 判断传入的 selector 是四种选择器中的哪一种
-                var first = selector.charAt( 0 );
-
-                if ( selector.split( ' ' ).length === 1 ) {
-                    // 如果中间不含有空格, 那么就考虑基本选择器
-                    if ( selector === '*' ) {
-                        return t( selector, results );
-                    } else if ( first === '#' ) {
-                        return id( selector.slice( 1 ), results );
-
-                    } else if ( first === '.' ) {
-                        return c( selector.slice( 1 ), results );
-
-                    } else {
-                        return t( selector, results );
-                    }
-                } else {
-                    // 处理其他的选择器
-                    throw new Error( '当前版本还不支持该选择器, 请联系 .....' );
+            // 核心模块
+            function Select( selector, node, results ){
+                node = node || document;
+                results = results || [];
+                if( support.qsa ){
+                    push.apply( results, node.querySelectorAll( selector ) );
+                    return unique( results );
+                }else{
+                    return getBoth( selector, node, results );
                 }
             }
-
-
-
             return Select;
 
         })();
 
-    Itcast.Select = Select;
+    It.Select = Select;
 
-
-// DOM 操作模块放到这里
-// 工具方法
-//var node = document.createElement( 'div' );
-//Itcast.parseHTML = function ( str ) {
-//	node.innerHTML = str;
-//	var arr = [];
-//	arr.push.apply( arr, node.childNodes );
-//	return arr;
-//};
-    Itcast.parseHTML = (function () {
-
-        var node = document.createElement( 'div' );
-
-        function parseHTML ( str ) {
-            node.innerHTML = str;
-            var arr = [];
-            arr.push.apply( arr, node.childNodes );
-            return arr;
-        };
-
-        return parseHTML;
-
-    })();
-
-
-
-// 模块中的实例方法
-    Itcast.fn.extend({
-        appendTo: function ( dom ) {
-            // 将 this 中的每一个成员加到 dom 中
-            for ( var i = 0; i < this.length; i++ ) {
-                dom.appendChild( this[ i ] );
+    // dom 模块
+    var parseHtml =
+        (function () {
+            var node = document.createElement( 'div' );
+            return function ( str ) {
+                node.innerHTML = str;
+                var arr = [];
+                [].push.apply( arr , node.childNodes);
+                return arr;
             }
-            return this;
-        }
-    })
+        })();
+
+    It.parseHtml = parseHtml;
+
+
+
+
+
+    window.It = window.I = It;
+
+})(window);
 
 
 
@@ -320,17 +398,61 @@
 
 
 
-// 工具方法
-
-// 模块方法
 
 
 
 
 
-    window.Itcast = window.I = Itcast;
 
-})( window )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
